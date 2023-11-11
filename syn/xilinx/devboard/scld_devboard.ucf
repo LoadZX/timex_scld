@@ -1,0 +1,77 @@
+NET	"TPIN" 		LOC="1";
+NET	"D<0>" 		LOC="2";
+NET	"D<3>" 		LOC="3";
+//NET	"CPUCLK"	LOC="4";
+NET	"MA<5>"		LOC="6";
+NET	"MA<6>"		LOC="7";
+NET	"D<4>"		LOC="8";
+NET	"D<5>"		LOC="9";
+NET	"BRIGHT"	LOC="10";
+NET	"MA<4>"		LOC = "11";
+NET	"CAS" 		LOC = "12";
+NET	"A7RB" 		LOC = "13";
+NET	"RD" 		LOC = "14";
+NET	"A<15>" 	LOC = "15";
+NET	"P5060"		LOC = "16";
+//NET	"NOE" 		LOC="18";
+NET	"SCLD_CLK"	LOC = "22";
+NET	"CPUCLK"	LOC = "23";
+NET	"A<13>"		LOC = "27";
+NET	"RFSH"		LOC = "28";
+NET	"AYCLK"		LOC = "29";
+NET	"A<14>"		LOC = "30";
+NET	"MREQ"		LOC = "32";
+NET	"IORQ"		LOC = "33";
+NET	"INT"		LOC = "34";
+
+NET	"BE"		LOC = "35";
+NET	"ROMCS"		LOC = "39";
+NET	"ROSCS"		LOC = "40";
+NET	"EXROM"		LOC = "41";
+NET	"G"		LOC = "42";
+NET	"B"		LOC = "43";
+NET	"WR"		LOC = "46";
+NET	"KB<4>"		LOC = "49";
+
+NET	"RAS"		LOC = "52";
+NET	"CAS1"		LOC = "53";
+NET	"TS"		LOC = "54";
+NET	"CAS2"		LOC = "58";
+NET	"MA<2>"		LOC = "59";
+NET	"MWE"		LOC = "60";
+NET	"D<7>"		LOC = "61";
+
+NET	"R"		LOC = "63";
+NET	"TPOUT"		LOC = "64";
+NET	"MA<1>"		LOC = "65";
+NET	"MA<7>"		LOC = "66";
+NET	"MA<3>"		LOC = "67";
+NET	"D<6>"		LOC = "68";
+NET	"MA<0>"		LOC = "70";
+NET	"D<2>"		LOC = "71";
+NET	"D<1>"		LOC = "73";
+
+NET	"A<5>"		LOC = "74";
+NET	"RDN"		LOC = "78";
+NET	"A<7>"		LOC = "79";
+NET	"BDIR"		LOC = "80";
+NET	"A<6>"		LOC = "81";
+NET	"CPUCLKB"	LOC = "82";
+NET	"A<2>"		LOC = "85";
+NET	"A<4>"		LOC = "86";
+
+NET	"A<1>"		LOC = "87";
+NET	"A<0>"		LOC = "89";
+NET	"A<3>"		LOC = "90";
+NET	"KB<1>"		LOC = "91";
+NET	"KB<2>"		LOC = "92";
+NET	"KB<0>"		LOC = "93";
+NET	"KB<3>"		LOC = "94";
+NET	"BC1"		LOC = "95";
+NET	"MUX"		LOC = "96";
+NET	"CSYNC"		LOC = "97";
+
+NET 	"SCLD_CLK" 	TNM_NET = SCLD_CLK;
+TIMESPEC TS_SCLD_CLK = PERIOD "SCLD_CLK" 14 MHz HIGH 50%;
+
+

@@ -1,0 +1,5 @@
+vhdl work "../../../rtl/scld_timing.vhd"
+vhdl work "../../../rtl/scld_regs.vhd"
+vhdl work "../../../rtl/scld_contention.vhd"
+vhdl work "../../../rtl/scld.vhd"
+vhdl work "scld_devboard.vhd"
