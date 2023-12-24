@@ -175,10 +175,6 @@ architecture sim of SCLD is
 
 begin
 
-  -- -----------------------
-  -- MISSING: flash support
-  -- -----------------------
-
   process(A_i(15 downto 14))
   begin
     VRAM_address_s <= '0';
