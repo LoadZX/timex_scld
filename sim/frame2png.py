@@ -5,14 +5,14 @@ usage: frame2png.py frame.txt out.png
 
 The input is one character per 14 MHz clock: a hex digit (I G R B) or 's'
 while composite sync is low. Line length is recovered from the spacing of
-the horizontal sync pulses, the top of the frame from the vertical sync.
+the horizontal sync pulses. The picture is exactly one frame, from the line
+after one vertical sync to the end of the next; sync is drawn black, so the
+vertical sync is the black band along the bottom edge.
 """
 import struct
 import sys
 import zlib
 from collections import Counter
-
-LINES = 312
 
 
 def main(src, dst):
@@ -42,8 +42,13 @@ def main(src, dst):
             break
         end = r
     top = next(e for e in edges if e > end[0] + end[1])
+    # Lines per frame: the distance to the next vertical sync.
+    later = [r for r in long_runs if r[0] - end[0] > 100 * width]
+    if not later:
+        sys.exit("less than one full frame in %s" % src)
+    lines = round((later[0][0] - long_runs[0][0]) / width)
     rows = []
-    for n in range(LINES):
+    for n in range(lines):
         row = s[top + n * width: top + (n + 1) * width]
         if len(row) < width:
             break

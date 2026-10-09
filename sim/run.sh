@@ -8,6 +8,7 @@
 #          (EXROM, 8K). The ROMs are not part of this repository.
 #   RTL   SCLD sources to test                       (default ../rtl)
 #   MS    simulated milliseconds                     (default 2000)
+#   HZ    50 or 60: frame rate strap, 312 or 262 lines (default 50)
 #   OUT   work/output directory                      (default ./work)
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -16,6 +17,8 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 : "${ROMS:?set ROMS to the directory with tc2068-0.rom and tc2068-1.rom}"
 RTL=${RTL:-$HERE/../rtl}
 MS=${MS:-2000}
+HZ=${HZ:-50}
+if [ "$HZ" = 60 ]; then HZ50=false; else HZ50=true; fi
 OUT=${OUT:-$HERE/work}
 mkdir -p "$OUT"
 cd "$OUT"
@@ -37,6 +40,6 @@ fi
 ghdl -a $F tb_tc2068_boot.vhd
 ghdl -e $F --syn-binding tb_tc2068_boot
 ghdl -r $F --syn-binding tb_tc2068_boot \
-     -gSIM_MS="$MS" -gHOME_ROM="$ROMS/tc2068-0.rom" -gEX_ROM="$ROMS/tc2068-1.rom" \
+     -gSIM_MS="$MS" -gHZ50="$HZ50" -gHOME_ROM="$ROMS/tc2068-0.rom" -gEX_ROM="$ROMS/tc2068-1.rom" \
      -gFRAME_FILE=frame.txt --ieee-asserts=disable-at-0 --stop-time="$((MS + 5))ms" 2>&1 | tee run.log
 python3 "$HERE/frame2png.py" frame.txt frame.png

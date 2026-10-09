@@ -61,6 +61,7 @@ use std.textio.all;
 entity tb_tc2068_boot is
   generic (
     SIM_MS      : integer := 2000;
+    HZ50        : boolean := true;    -- false: 60 Hz, 262 lines
     HOME_ROM    : string  := "tc2068-0.rom";
     EX_ROM      : string  := "tc2068-1.rom";
     FRAME_FILE  : string  := "frame.txt";
@@ -92,6 +93,7 @@ architecture sim of tb_tc2068_boot is
   signal ex_rom_c   : rom_t(0 to 8191)  := load_rom(EX_ROM, 8192);
 
   signal clk14      : std_logic := '0';
+  signal p5060      : std_logic;
   signal reset_n    : std_logic := '0';
   signal running    : boolean := true;
 
@@ -154,6 +156,7 @@ architecture sim of tb_tc2068_boot is
 begin
 
   clk14   <= not clk14 after CLK_HALF when running else '0';
+  p5060   <= '1' when HZ50 else '0';   -- SCLD: '1' is 312 lines, '0' is 262
   reset_n <= '1' after 50 us;
 
   -- ------------------------------------------------------------------ Z80
@@ -197,7 +200,7 @@ begin
       RD_i      => rd_n,
       WR_i      => wr_n,
       RFSH_i    => rfsh_n,
-      P5060_i   => '0',
+      P5060_i   => p5060,
       BE_i      => '1',
       RAS_o     => ras,
       CAS_o     => cas,

@@ -14,6 +14,7 @@ T80=/path/to/t80 MODELS=/path/to/models ROMS=/path/to/roms ./run.sh
 | `ROMS` | `tc2068-0.rom` (HOME, 16K) and `tc2068-1.rom` (EXROM, 8K) |
 | `RTL` | SCLD sources to test. Default `../rtl` |
 | `MS` | Simulated milliseconds. Default 2000 |
+| `HZ` | `50` or `60`: the SCLD's frame-rate strap, 312 or 262 lines. Default 50 |
 | `OUT` | Work and output directory. Default `./work` |
 
 None of the three inputs is in this repository. The ROMs are the ones Fuse
@@ -24,7 +25,8 @@ The RAM test takes 1.7 s of simulated time, and the copyright screen is up by
 
 ## Reading the result
 
-`work/frame.png` is the screen. `work/run.log` holds, in order:
+`work/frame.png` is the screen: exactly one frame, sync drawn black, so the
+vertical sync is the black band along the bottom edge. `work/run.log` holds, in order:
 
 - `IO  IN/OUT FF|F4 = ..` — every access to the two banking ports, with
   `READBACK MISMATCH` when a read does not return the last value written.
