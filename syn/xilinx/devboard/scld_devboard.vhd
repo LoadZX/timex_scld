@@ -10,6 +10,15 @@ use work.scldpkg.all;
 --use unisim.vcomponents.all;
 
 entity scld_devboard is
+  generic (
+    -- /INT is open-drain by default and relies on a pull-up on the board.
+    -- Set to false to drive it high as well. A machine with no pull-up on
+    -- /INT needs that: the fitter is run with "-terminate keeper", and a
+    -- bus keeper holds a released pin at the level it was last driven to,
+    -- which for /INT is low.
+    -- Do not use it if anything else on the bus can pull /INT low.
+    INT_OPEN_DRAIN : boolean := true
+  );
   port (
     SCLD_CLK      : in std_logic;
     A             : in std_logic_vector(15 downto 0);
@@ -179,7 +188,12 @@ begin
 
 
   -- Open-drain outputs.
-  INT <= '0' when INT_oe_o_s='1' else 'Z';
+  int_od: if INT_OPEN_DRAIN generate
+    INT <= '0' when INT_oe_o_s='1' else 'Z';
+  end generate;
+  int_pp: if not INT_OPEN_DRAIN generate
+    INT <= '0' when INT_oe_o_s='1' else '1';
+  end generate;
 
   -- TBD: confirm if these signals are open-drain or are directly driven.
   ROMCS  <= ROMCS_o_s WHEN OE='1' else 'Z';
