@@ -4,6 +4,7 @@
 --  (c) by Load ZX Museum <curator@loadzx.com>
 --  (c) by Alvaro Lopes <alvieboy@alvie.com>
 --  (c) by Paulo Cortesao <cortesao.paulo@outlook.pt>
+--  (c) by Antonio Vitor <antonio_cpv@hotmail.com>
 --
 -- This TIMEX(tm) SCLD 2068 Model is licensed under a
 -- Creative Commons Attribution-ShareAlike 4.0 International License.
@@ -560,7 +561,9 @@ begin
     D_oe_o <= '0';
     if IORQ_i='0' and RD_i='0' and TS_s='0' then
       case A_i(7 downto 0) is
-        when x"FE" =>    -- Keyboard, MIC
+        when x"FE" |     -- Keyboard, MIC
+             x"FF" |     -- Video mode, interrupt disable, DOCK/EXROM select
+             x"F4" =>    -- Horizontal select (per-chunk bank select)
           D_oe_o <= '1';
         when others =>
       end case;
@@ -709,13 +712,21 @@ begin
   -- AY
   AYCLK_o   <= ayclk_s;
 
-  D_o <= '0' & TPIN_i & '0' & KB_i;
+  -- Ports FFh and F4h read back what was written to them. The TC2068 ROMs
+  -- depend on it: every bank switch is a read-modify-write of one or both.
+  with A_i(7 downto 0) select D_o <=
+    bank_s & disableint_s & hirescolor_s & screenmode_s when x"FF",
+    banksel_s                                           when x"F4",
+    '0' & TPIN_i & '0' & KB_i                           when others;
 
-  ROMCS_o   <= (banksel_s(0) OR NOT BE_i) when A_i(15 downto 13)="000" else
-               (banksel_s(1) OR NOT BE_i) when A_i(15 downto 13)="001"
+  -- The three ROM selects are memory selects: they must not assert during
+  -- an I/O cycle. The ROMs are enabled by /RD, so a select left low while
+  -- the Z80 reads a port puts ROM data on the bus on top of the port data.
+  ROMCS_o   <= (banksel_s(0) OR NOT BE_i OR MREQ_i) when A_i(15 downto 13)="000" else
+               (banksel_s(1) OR NOT BE_i OR MREQ_i) when A_i(15 downto 13)="001"
                else '1';
-  ROSCS_o   <= (not current_banksel_s OR NOT BE_i) when bank_s='0' else '1';
-  EXROM_o   <= (not current_banksel_s OR NOT BE_I) when bank_s='1' else '1';
+  ROSCS_o   <= (not current_banksel_s OR NOT BE_i OR MREQ_i) when bank_s='0' else '1';
+  EXROM_o   <= (not current_banksel_s OR NOT BE_i OR MREQ_i) when bank_s='1' else '1';
   TPOUT_o   <= ear_s;
 
   BDIR_o    <= bdir_s;
