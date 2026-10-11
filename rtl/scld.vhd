@@ -162,6 +162,7 @@ architecture sim of SCLD is
   signal CASCPU_s                 : std_logic;
   signal current_banksel_s        : std_logic;
   signal refresh_ras_s            : std_logic;
+  signal refresh_en_r             : std_logic := '1';
 
   signal bdir_s                   : std_logic;
   signal bc1_s                    : std_logic;
@@ -674,9 +675,22 @@ begin
     end if;
   end process;
 
-  process(hcounter_s, MREQ_dly_r, RFSH_i)
+  -- Z80 refresh cycles reach the video RAM only outside the fetch window
+  -- (hcounter_s(9)='1'). The permission is sampled between refresh cycles, so
+  -- one that is under way when the counter crosses 511->512 or 895->0 ends
+  -- as it began, instead of having its RAS started or cut short mid-cycle.
+  process(SCLD_CLK)
   begin
-    refresh_ras_s <= (RFSH_i OR MREQ_dly_r OR NOT hcounter_s(9));
+    if falling_edge(SCLD_CLK) then
+      if RFSH_i='1' then
+        refresh_en_r <= hcounter_s(9);
+      end if;
+    end if;
+  end process;
+
+  process(refresh_en_r, MREQ_dly_r, RFSH_i)
+  begin
+    refresh_ras_s <= (RFSH_i OR MREQ_dly_r OR NOT refresh_en_r);
   end process;
 
   RAS_o     <= RAS_r when TS_s='1' else
