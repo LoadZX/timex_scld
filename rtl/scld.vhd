@@ -201,6 +201,7 @@ begin
     clk_i         => SCLD_CLK,
     arst_i        => '0',--arst_s,
     hcounter_i    => hcounter_s,
+    vdisplay_i    => vdisplay_s,
     IORQ_i        => IORQ_i,
     MREQ_i        => MREQ_i,
     RD_i          => RD_i,
@@ -305,9 +306,11 @@ begin
     end if;
   end process;
 
-  process(hcounter_s)
+  -- TS is raised only while the SCLD fetches video: 16 times a line on the
+  -- 192 display lines, like RAS/CAS above, and never on border lines.
+  process(hcounter_s, vdisplay_s)
   begin
-    if hcounter_s(9)='1' then
+    if hcounter_s(9)='1' or vdisplay_s='0' then
       TS_s <= '0';
     else
       if hcounter_s(4)='1'  then

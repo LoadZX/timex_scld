@@ -28,6 +28,8 @@ entity scld_contention is
     clk_i         : in std_logic;
     arst_i        : in std_logic;
     hcounter_i    : in unsigned(9 downto 0);
+    -- '1' on the 192 scanlines where the SCLD fetches video
+    vdisplay_i    : in std_logic;
     IORQ_i        : in std_logic;
     MREQ_i        : in std_logic;
     RD_i          : in std_logic;
@@ -54,12 +56,15 @@ begin
 
   vram_access_s <= '1' when  A_i(15 downto 14)="01" else '0';
 
-  process(hcounter_i, A_i, IORQ_i, MREQ_i, request_rd_r, request_wr_r,
+  -- The CPU is only held off while the SCLD is reading the video RAM: the
+  -- first 512 counts of a line, on the 192 display lines. There is nothing to
+  -- wait for on border and blanking lines.
+  process(hcounter_i, vdisplay_i, A_i, IORQ_i, MREQ_i, request_rd_r, request_wr_r,
           vram_access_s, nrequest_r, contention_cycle_s)
   begin
     request_needs_contention_s <= '0';
 
-    if hcounter_i(9)='0' then
+    if hcounter_i(9)='0' and vdisplay_i='1' then
       if vram_access_s='1' or IORQ_i='0' then --or MREQ_i='0' then
         request_needs_contention_s <= contention_cycle_s;
       end if;
