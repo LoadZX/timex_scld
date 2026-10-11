@@ -23,6 +23,29 @@ ships. GHDL and Python 3 are needed; nothing else.
 The RAM test takes 1.7 s of simulated time, and the copyright screen is up by
 2.0 s. A run of 2000 ms takes about six minutes.
 
+## Display-lines check
+
+```sh
+MODELS=/path/to/models ./run_display_lines.sh
+```
+
+A second, self-checking bench: `tb_display_lines.vhd` runs the SCLD alone for
+one frame with 4000h parked on the address bus, and fails unless the SCLD
+raises TS, and stretches the CPU clock, on the 192 display lines and on no
+others. It needs only `txt_util.vhd` from `MODELS`, takes `RTL`, `HZ` and
+`OUT` like `run.sh`, and finishes in a few seconds.
+
+## Refresh RAS check
+
+```sh
+MODELS=/path/to/models ./run_refresh_ras.sh
+```
+
+Also self-checking: `tb_refresh_ras.vhd` plays three Z80 refresh cycles into
+the SCLD alone, one well outside the fetch window and one across each edge of
+it, and fails unless the video RAM gets a whole RAS pulse or none. Same
+inputs as the display-lines check.
+
 ## Reading the result
 
 `work/frame.png` is the screen: exactly one frame, sync drawn black, so the

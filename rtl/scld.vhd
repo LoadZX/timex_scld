@@ -162,6 +162,7 @@ architecture sim of SCLD is
   signal CASCPU_s                 : std_logic;
   signal current_banksel_s        : std_logic;
   signal refresh_ras_s            : std_logic;
+  signal refresh_en_r             : std_logic := '1';
 
   signal bdir_s                   : std_logic;
   signal bc1_s                    : std_logic;
@@ -201,6 +202,7 @@ begin
     clk_i         => SCLD_CLK,
     arst_i        => '0',--arst_s,
     hcounter_i    => hcounter_s,
+    vdisplay_i    => vdisplay_s,
     IORQ_i        => IORQ_i,
     MREQ_i        => MREQ_i,
     RD_i          => RD_i,
@@ -305,9 +307,11 @@ begin
     end if;
   end process;
 
-  process(hcounter_s)
+  -- TS is raised only while the SCLD fetches video: 16 times a line on the
+  -- 192 display lines, like RAS/CAS above, and never on border lines.
+  process(hcounter_s, vdisplay_s)
   begin
-    if hcounter_s(9)='1' then
+    if hcounter_s(9)='1' or vdisplay_s='0' then
       TS_s <= '0';
     else
       if hcounter_s(4)='1'  then
@@ -671,9 +675,22 @@ begin
     end if;
   end process;
 
-  process(hcounter_s, MREQ_dly_r, RFSH_i)
+  -- Z80 refresh cycles reach the video RAM only outside the fetch window
+  -- (hcounter_s(9)='1'). The permission is sampled between refresh cycles, so
+  -- one that is under way when the counter crosses 511->512 or 895->0 ends
+  -- as it began, instead of having its RAS started or cut short mid-cycle.
+  process(SCLD_CLK)
   begin
-    refresh_ras_s <= (RFSH_i OR MREQ_dly_r OR NOT hcounter_s(9));
+    if falling_edge(SCLD_CLK) then
+      if RFSH_i='1' then
+        refresh_en_r <= hcounter_s(9);
+      end if;
+    end if;
+  end process;
+
+  process(refresh_en_r, MREQ_dly_r, RFSH_i)
+  begin
+    refresh_ras_s <= (RFSH_i OR MREQ_dly_r OR NOT refresh_en_r);
   end process;
 
   RAS_o     <= RAS_r when TS_s='1' else
